@@ -1,9 +1,7 @@
 package cn.edu.china.ntu.bluetoothchat;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,29 +9,24 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
+import android.view.View;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import org.json.JSONStringer;
-
-import java.io.Console;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
-
-    private TextView mTextMessage;
 
     private ListView deviceListView;
 
     private BluetoothAdapter btAdapter;
+
+    private BottomNavigationView navigationView;
 
     private static final ConcurrentHashMap<String, BluetoothDevice> deviceMap = new ConcurrentHashMap<>();
 
@@ -48,12 +41,14 @@ public class MainActivity extends AppCompatActivity {
             try {
                 switch (item.getItemId()) {
                     case R.id.navigation_home:
+                        deviceListView.setVisibility(View.VISIBLE);
                         return true;
                     case R.id.navigation_dashboard:
-                        mTextMessage.setText(R.string.title_message);
+                        navigationView.setVisibility(View.GONE);
+                        deviceListView.setVisibility(View.INVISIBLE);
                         return true;
                     case R.id.navigation_notifications:
-                        mTextMessage.setText(R.string.title_account);
+                        deviceListView.setVisibility(View.INVISIBLE);
                         return true;
                 }
 
@@ -68,16 +63,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mTextMessage = (TextView) findViewById(R.id.message);
-        deviceListView = (ListView) findViewById(R.id.devicelist);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        deviceListView = (ListView) findViewById(R.id.devicelist_view);
+        navigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        navigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         init();
         initBluetooth();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item,
-                Arrays.asList("a","b","c"));
-        this.deviceListView.setAdapter(adapter);
+        LayoutInflater inflater = getLayoutInflater();
+        DeviceAdapter deviceAdapter = new DeviceAdapter(Arrays.asList("xiaofeiyu","sdf"),inflater);
+        this.deviceListView.setAdapter(deviceAdapter);
+        deviceListView.setVisibility(View.INVISIBLE);
     }
 
     private void init() {
